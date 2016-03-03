@@ -1,3 +1,4 @@
+using System;
 using System.Threading.Tasks;
 using Microsoft.Owin.FileSystems;
 using Microsoft.Owin.StaticFiles;
@@ -14,7 +15,7 @@ namespace todoapp.overengineered.server
                 builder.UseFileServer(new FileServerOptions
                 {
                     FileSystem =
-                        new PhysicalFileSystem(@"C:\DEV\todoapp.overengineered\src\todoapp.overengineered.server")
+                        new PhysicalFileSystem(string.Format(@"{0}\..\..\..\wwwroot", Environment.CurrentDirectory))
                 });
             });
         }
