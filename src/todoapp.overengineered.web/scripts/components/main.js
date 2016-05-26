@@ -1,6 +1,8 @@
 import R from 'reren';
 import todoItem from './todoItem';
 import footer from './footer';
+import uuid from 'uuid';
+import { execute as cedarExecute } from '../utils/cedar';
 
 var Main = R.component({
     controller: function() {
@@ -10,6 +12,14 @@ var Main = R.component({
 
         this.model.onNewTaskKeyUp = (e) => {
             if (e.keyCode == 13 && e.target.value) {
+                cedarExecute({
+                    commandName: 'addTodo',
+                    version: 1,
+                    commandId: uuid.v4(),
+                    text: e.target.value
+                })
+
+
                 this.model.todos.push({ index: this.model.todos.length + 1, text: e.target.value });
                 this.model.newTodoText = "";
                 e.target.value = "";
