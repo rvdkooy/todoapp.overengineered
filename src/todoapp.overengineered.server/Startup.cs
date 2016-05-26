@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.Owin.FileSystems;
 using Microsoft.Owin.StaticFiles;
@@ -10,13 +11,10 @@ namespace todoapp.overengineered.server
     {
         public void Configuration(IAppBuilder app)
         {
-            app.Map("/statics", builder =>
+            app.UseFileServer(new FileServerOptions
             {
-                builder.UseFileServer(new FileServerOptions
-                {
-                    FileSystem =
-                        new PhysicalFileSystem(string.Format(@"{0}\..\..\..\wwwroot", Environment.CurrentDirectory))
-                });
+                FileSystem = new PhysicalFileSystem(string.Format(@"{0}\..\..\..\wwwroot", Environment.CurrentDirectory)),
+                EnableDefaultFiles = true
             });
         }
     }
