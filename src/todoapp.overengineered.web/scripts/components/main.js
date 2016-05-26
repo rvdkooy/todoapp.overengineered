@@ -51,7 +51,7 @@ var Main = R.component({
 
         return R.section({ classes: "todoapp" }, [
                     R.header({ classes: "header" }, [
-                        R.h1(null, "reren todo"),
+                        R.h1(null, "Todo's"),
                         R.input({ classes: "new-todo",
                                     type: "text",
                                     placeholder: "What needs to be done?",
