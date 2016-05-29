@@ -65,6 +65,10 @@
       <HintPath>..\packages\Microsoft.Owin.StaticFiles.3.0.1\lib\net45\Microsoft.Owin.StaticFiles.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="NEventStore, Version=5.2.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\NEventStore.5.2.0\lib\net40\NEventStore.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="Newtonsoft.Json, Version=6.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <HintPath>..\packages\Newtonsoft.Json.6.0.4\lib\net45\Newtonsoft.Json.dll</HintPath>
       <Private>True</Private>
@@ -97,9 +101,19 @@
   <ItemGroup>
     <Compile Include="Commanding\CommandModule.cs" />
     <Compile Include="Commanding\Commands\NewTodo.cs" />
+    <Compile Include="Controllers\TodoController.cs" />
+    <Compile Include="Domain\AggregateRoot.cs" />
+    <Compile Include="Domain\Aggregates\ToDo.cs" />
+    <Compile Include="Infrastructure\TinyIocDependencyResolver.cs" />
+    <Compile Include="Messages\TodoCreated.cs" />
+    <Compile Include="Infrastructure\EventStoreBootstrapper.cs" />
+    <Compile Include="Infrastructure\EventStoreRepository.cs" />
     <Compile Include="Program.cs" />
+    <Compile Include="Projections\InMemoryProjectionStore.cs" />
+    <Compile Include="Projections\Projector.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Startup.cs" />
+    <Compile Include="Infrastructure\TinyIoC.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

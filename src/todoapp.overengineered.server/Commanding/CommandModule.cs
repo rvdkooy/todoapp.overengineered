@@ -1,20 +1,22 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Cedar.CommandHandling;
+﻿using Cedar.CommandHandling;
 using todoapp.overengineered.server.Commanding.Commands;
+using todoapp.overengineered.server.Domain.Aggregates;
+using todoapp.overengineered.server.Infrastructure;
 
 namespace todoapp.overengineered.server.Commanding
 {
     class CommandModule : CommandHandlerModule
     {
-        public CommandModule()
+        private readonly EventStoreRepository _eventStoreRepository;
+
+        public CommandModule(EventStoreRepository eventStoreRepository)
         {
+            _eventStoreRepository = eventStoreRepository;
+
             For<NewTodo>().Handle(commandMessage =>
             {
-                // write to an eventstore here!
+                var todo = new ToDo(commandMessage.Command.Text);
+                _eventStoreRepository.Save(todo);
             });
         }
     }

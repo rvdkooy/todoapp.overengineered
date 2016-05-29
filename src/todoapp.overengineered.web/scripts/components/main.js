@@ -3,12 +3,23 @@ import todoItem from './todoItem';
 import footer from './footer';
 import uuid from 'uuid';
 import { execute as cedarExecute } from '../utils/cedar';
+import { query } from '../utils/httpClient';
 
 var Main = R.component({
     controller: function() {
         this.model.todos = [];
         this.model.newTodoText = "";
         this.model.activeFilter = "all";
+
+        query('api/todos').then(result => {
+            this.model.todos = result.map(x => {
+                return {
+                    index: x.Id,
+                    text: x.Text
+                };
+            });
+            this.update();
+        });
 
         this.model.onNewTaskKeyUp = (e) => {
             if (e.keyCode == 13 && e.target.value) {
