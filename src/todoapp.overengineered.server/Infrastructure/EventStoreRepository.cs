@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using NEventStore;
 using todoapp.overengineered.server.Domain;
 
@@ -12,18 +13,56 @@ namespace todoapp.overengineered.server.Infrastructure
             _store = store;
         }
 
-        public void Save(AggregateRoot aggregate)
+        public void Create(AggregateRoot aggregate)
         {
-            using (var stream = _store.CreateStream(aggregate.Id))
+            try
             {
-                foreach (var @event in aggregate.GetChanges())
+                using (var stream = _store.CreateStream(aggregate.Id))
                 {
-                    stream.Add(new EventMessage { Body = @event });
+                    AppendToStreamAndCommit(aggregate, stream);
                 }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+                throw;
+            }
+        }
 
-                stream.CommitChanges(Guid.NewGuid());
+        public void Update(AggregateRoot aggregate)
+        {
+            try
+            {
+                using (var stream = _store.OpenStream(aggregate.Id))
+                {
+                    AppendToStreamAndCommit(aggregate, stream);
+                }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+                throw;
+            }
+        }
 
-                aggregate.MarkChangesAsCommitted();
+        private void AppendToStreamAndCommit(AggregateRoot aggregate, IEventStream stream)
+        {
+            foreach (var @event in aggregate.GetChanges())
+            {
+                stream.Add(new EventMessage { Body = @event });
+            }
+
+            stream.CommitChanges(Guid.NewGuid());
+
+            aggregate.MarkChangesAsCommitted();
+        }
+
+        public T Get<T>(string id, T instance) where T : AggregateRoot
+        {
+            using (var stream = _store.OpenStream(id))
+            {
+                instance.LoadFromHistory(stream.CommittedEvents.Select(e => e.Body));
+                return instance;
             }
         }
     }

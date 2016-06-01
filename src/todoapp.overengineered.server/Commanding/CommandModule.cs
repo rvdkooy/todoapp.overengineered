@@ -16,7 +16,16 @@ namespace todoapp.overengineered.server.Commanding
             For<NewTodo>().Handle(commandMessage =>
             {
                 var todo = new ToDo(commandMessage.Command.Text);
-                _eventStoreRepository.Save(todo);
+                _eventStoreRepository.Create(todo);
+            });
+
+            For<DeleteTodo>().Handle(commandMessage =>
+            {
+                var toDo = _eventStoreRepository.Get(commandMessage.Command.Id, new ToDo());
+
+                toDo.Delete();
+
+                _eventStoreRepository.Update(toDo);
             });
         }
     }

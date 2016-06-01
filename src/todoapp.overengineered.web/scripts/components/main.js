@@ -14,7 +14,7 @@ var Main = R.component({
         query('api/todos').then(result => {
             this.model.todos = result.map(x => {
                 return {
-                    index: x.Id,
+                    id: x.Id,
                     text: x.Text
                 };
             });
@@ -24,14 +24,13 @@ var Main = R.component({
         this.model.onNewTaskKeyUp = (e) => {
             if (e.keyCode == 13 && e.target.value) {
                 cedarExecute({
-                    commandName: 'addTodo',
-                    version: 1,
+                    commandName: 'newtodo',
                     commandId: uuid.v4(),
                     text: e.target.value
-                })
+                });
 
 
-                this.model.todos.push({ index: this.model.todos.length + 1, text: e.target.value });
+                this.model.todos.push({ id: this.model.todos.length + 1, text: e.target.value });
                 this.model.newTodoText = "";
                 e.target.value = "";
                 this.update();
@@ -39,7 +38,14 @@ var Main = R.component({
         };
 
         this.model.onRemoveTodo = (todo) => {
-            this.model.todos = this.model.todos.filter(x => x.index !== todo.index);
+            cedarExecute({
+                commandName: 'deletetodo',
+                commandId: uuid.v4(),
+                id: todo.id
+            });
+
+
+            this.model.todos = this.model.todos.filter(x => x.id !== todo.id);
             this.update();
         };
 

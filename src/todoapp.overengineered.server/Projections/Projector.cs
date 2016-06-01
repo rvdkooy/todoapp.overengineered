@@ -1,23 +1,26 @@
-﻿using todoapp.overengineered.server.Messages;
+﻿using System;
+using System.Collections.Generic;
 
 namespace todoapp.overengineered.server.Projections
 {
     public class Projector
     {
-        private readonly InMemoryProjectionStore _projectionStore;
+        private readonly IDictionary<Type, Action<object>> _registrations = new Dictionary<Type, Action<object>>();
 
-        public Projector(InMemoryProjectionStore projectionStore)
+        public void When<T>(Action<T> action)
         {
-            _projectionStore = projectionStore;
+            _registrations.Add(typeof(T), e => action.Invoke((T)e) );
         }
 
-        public void Project(TodoCreated todoCreated)
+        public void Project(object @event)
         {
-            _projectionStore.Add(todoCreated.Id, new
+            var eventType = @event.GetType();
+
+            if (_registrations.ContainsKey(eventType))
             {
-                Id = todoCreated.Id,
-                Text = todoCreated.Text
-            });
+                var action = _registrations[eventType];
+                action.Invoke(@event);
+            }
         }
     }
 }

@@ -20,5 +20,10 @@ namespace todoapp.overengineered.server.Projections
         {
             return _items.Values;
         }
+
+        public void Delete(string id)
+        {
+            _items.Remove(id);
+        }
     }
 }

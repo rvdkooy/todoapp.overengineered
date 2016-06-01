@@ -100,16 +100,20 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Commanding\CommandModule.cs" />
+    <Compile Include="Commanding\Commands\DeleteTodo.cs" />
     <Compile Include="Commanding\Commands\NewTodo.cs" />
     <Compile Include="Controllers\TodoController.cs" />
     <Compile Include="Domain\AggregateRoot.cs" />
     <Compile Include="Domain\Aggregates\ToDo.cs" />
+    <Compile Include="Infrastructure\EventStorePoller.cs" />
     <Compile Include="Infrastructure\TinyIocDependencyResolver.cs" />
     <Compile Include="Messages\TodoCreated.cs" />
     <Compile Include="Infrastructure\EventStoreBootstrapper.cs" />
     <Compile Include="Infrastructure\EventStoreRepository.cs" />
+    <Compile Include="Messages\TodoDeleted.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Projections\InMemoryProjectionStore.cs" />
+    <Compile Include="Projections\ProjectionsModule.cs" />
     <Compile Include="Projections\Projector.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Startup.cs" />

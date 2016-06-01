@@ -1,9 +1,13 @@
 using System;
+using System.Collections.Generic;
+using System.Reflection;
 using System.Web.Http;
 using Cedar.CommandHandling;
 using Cedar.CommandHandling.Http;
+using Cedar.CommandHandling.Http.TypeResolution;
 using Microsoft.Owin.FileSystems;
 using Microsoft.Owin.StaticFiles;
+using NEventStore;
 using Owin;
 using todoapp.overengineered.server.Commanding;
 using todoapp.overengineered.server.Commanding.Commands;
@@ -19,29 +23,37 @@ namespace todoapp.overengineered.server
         {
             var container = new TinyIoCContainer();
             var inMemoryProjectionStore = new InMemoryProjectionStore();
-            var projector = new Projector(inMemoryProjectionStore);
-            var eventStoreBootstrapper = new EventStoreBootstrapper(projector);
-            var store = eventStoreBootstrapper.Start();
+            var eventStoreBootstrapper = new EventStoreBootstrapper();
+            var eventStore = eventStoreBootstrapper.Start();
 
-            container.Register(new EventStoreRepository(store));
+            container.Register(new EventStoreRepository(eventStore));
             container.Register(inMemoryProjectionStore);
-            
-            registerMiddleWare(app, container);
+
+            RegisterProjections(eventStore, inMemoryProjectionStore);
+            RegisterMiddleWare(app, container);
         }
 
-        private void registerMiddleWare(IAppBuilder app, TinyIoCContainer container)
+        private void RegisterProjections(IStoreEvents eventStore, InMemoryProjectionStore inMemoryProjectionStore)
+        {
+            var eventStorePoller = new EventStorePoller(eventStore, ProjectionsModule.GetProjectors(inMemoryProjectionStore));
+            eventStorePoller.Start();
+        }
+
+        private void RegisterMiddleWare(IAppBuilder app, TinyIoCContainer container)
         {
             var commandModule = container.Resolve<CommandModule>();
             var resolver = new CommandHandlerResolver(commandModule);
+
+            
             var middleWare = CommandHandlingMiddleware.HandleCommands(new CommandHandlingSettings(
                 resolver,
-                ResolveCommandType
+                UsingDataContractNamespace(resolver.KnownCommandTypes)
                 ));
 
             app.Map("/commands", builder => builder.Use(middleWare));
             app.UseFileServer(new FileServerOptions
             {
-                FileSystem = new PhysicalFileSystem(string.Format(@"{0}\..\..\..\wwwroot", Environment.CurrentDirectory)),
+                FileSystem = new PhysicalFileSystem($@"{Environment.CurrentDirectory}\..\..\..\wwwroot"),
                 EnableDefaultFiles = true
             });
 
@@ -55,14 +67,16 @@ namespace todoapp.overengineered.server
             app.Map("/api", builder => builder.UseWebApi(config));
         }
 
-        private Type ResolveCommandType(string mediaType)
+        public static CommandMediaTypeMap UsingDataContractNamespace(IEnumerable<Type> knownCommandTypes)
         {
-            if (mediaType.ToLower().Contains("addtodo"))
+            var map = new CommandMediaTypeMap(new CommandMediaTypeWithDotVersionFormatter());
+
+            foreach (var type in knownCommandTypes)
             {
-                return typeof(NewTodo);
+                map.Add(type.Name.ToLower(), type);
             }
 
-            throw new InvalidOperationException("Could not resolve commandtype: " + mediaType);
+            return map;
         }
     }
 }
